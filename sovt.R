@@ -141,6 +141,9 @@ macierz_H2.cor
 macierz_H2.rcorr = rcorr(as.matrix(macierz_H2))
 macierz_H2.rcorr
 
+# correlate pure negative affect with PD
+cor(prereg$HE_neg, prereg$IRI_PD, use ="pairwise.complete.obs")
+
 
 ############################ H3 SoVT & compassion $ helping beh ######################### 
 
