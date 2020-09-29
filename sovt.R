@@ -229,23 +229,28 @@ sd(res_sd)
 ############## one predictor model
 
 onepred <- lm(hypothetical ~ IRI_EC, prereg)
+onepred2 <- lm(hypothetical ~ CLS, prereg)
+onepred3 <- lm(hypothetical ~ HE_comp, prereg)
+
 summary(onepred)
 
 ############# two predictors: IRI_EC and compassion (SoVT)
 
 twopred <- lm(hypothetical ~ IRI_EC + HE_comp, prereg)
+twopred2 <- lm(hypothetical ~ IRI_EC + CLS, prereg)
+twopred3 <- lm(hypothetical ~ HE_comp + IRI_EC, prereg)
 summary(twopred)
-
-########## compare the models
-anova(onepred)
-anova(twopred)
 
 ############# three predictors: CLS, IRI_EC and compassion (SoVT)
 
 threepred <- lm(hypothetical ~ IRI_EC + CLS + HE_comp, prereg)
 summary(threepred)
 anova(threepred)
-anova(onepred,twopred)
+
+########## compare the models
+anova(onepred, twopred2)
+anova(twopred2, threepred)
+anova(onepred3, twopred3)
 
 ############ checking the assumptions of linear regression:
 
