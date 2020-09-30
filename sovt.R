@@ -295,6 +295,19 @@ pval <- pnorm(abs(summary_table[, "t value"]),lower.tail = FALSE)* 2
 summary_table <- cbind(summary_table, "p value" = round(pval,3))
 summary_table
 
+library(nnet)
+mlm <- multinom(beh_upperf ~ IRI_EC, data=prereg)
+
+M1 <- logLik(m)
+M2 <- logLik(mlm)
+(G <- -2*(M1[1] - M2[1]))
+pchisq(G,3,lower.tail = FALSE)
+# -> the p-value is significant, this means that the multinomial logit model (mlm) 
+# differs (fits better) from the ordinal logistic model. Therefore the assumption of
+# proportional odds is not met. This is also indicated by the variance in the coefficients
+# for the effect of IRI_EC acrross the different levels of the outcome in the mlm model:
+summary(mlm)
+
 ############## ordinal log regression with 2 predictors:
 m <- polr(beh_upperf ~ IRI_EC + HE_comp, data = prereg, Hess=TRUE)
 summary(m)
