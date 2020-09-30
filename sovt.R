@@ -284,6 +284,14 @@ dwtest(twopred)
 
 ######################################## ordinal log regression
 
+####### Descirptive plots
+ggplot(prereg, aes(x = beh_upperf, y = IRI_EC)) + geom_boxplot()
+ggplot(prereg, aes(x = as.factor(beh_sumB), y = IRI_EC)) + geom_boxplot()
+ggplot(prereg, aes(x = beh_upperf, y = HE_comp)) + geom_boxplot()
+
+
+####### Tests
+
 require(foreign)
 require(ggplot2)
 require(MASS)
