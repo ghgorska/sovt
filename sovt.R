@@ -32,6 +32,10 @@ install.packages("dplyr")
 library(dplyr)
 odpIZR_beh %>% count(behavioural)
 
+# sum of selected helping options (not weigthed by the degree of commitment of the option)
+# (added by Mathis)
+prereg$beh_sumB <- nchar(gsub("[^1-9]", "",  prereg$`behavioural question`))
+
 
 ######################## DATA ANALYSIS ######################## 
 
