@@ -155,7 +155,7 @@ prereg$comp <- (prereg$HE_comp - prereg$NEU_comp)
 
 shapiro.test(prereg$comp)
 
-macierz_H3 <- prereg[, c("HE_comp", "comp", "HE_neg", "neg_emo", "CLS", "IRI_EC", "hypothetical", "beh_sum", "beh_upper", "beh_lower", "beh_weight", 
+macierz_H3 <- prereg[, c("HE_comp", "comp", "HE_neg", "neg_emo", "CLS", "IRI_EC", "IRI_PD", "IRI_FS", "IRI_PT", "hypothetical", "beh_sum", "beh_sumB", "beh_upper", "beh_lower", "beh_weight", 
                          "beh_binary", "beh_contin")]
 
 
