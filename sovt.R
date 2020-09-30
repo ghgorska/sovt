@@ -289,6 +289,7 @@ require(reshape2)
 prereg$beh_upperf <- as.factor(prereg$beh_upper)
 
 m <- polr(beh_upperf ~ IRI_EC, data = prereg, Hess=TRUE)
+#m <- polr(beh_upperf ~ HE_comp, data = prereg, Hess=TRUE)
 summary(m)
 summary_table <- coef(summary(m))
 pval <- pnorm(abs(summary_table[, "t value"]),lower.tail = FALSE)* 2
@@ -297,6 +298,7 @@ summary_table
 
 library(nnet)
 mlm <- multinom(beh_upperf ~ IRI_EC, data=prereg)
+#mlm <- multinom(beh_upperf ~ HE_comp, data=prereg)
 
 M1 <- logLik(m)
 M2 <- logLik(mlm)
