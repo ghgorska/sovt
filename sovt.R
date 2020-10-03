@@ -256,6 +256,13 @@ anova(onepred, twopred2)
 anova(twopred2, threepred)
 anova(onepred3, twopred3)
 
+######### compariong the sovt empathy score to IRI (added by Mathis)
+model1 <- lm(hypothetical ~ IRI_EC + IRI_PD + IRI_FS + IRI_PT, prereg)
+model2 <- lm(hypothetical ~ IRI_EC + IRI_PD + IRI_FS + IRI_PT + neg_emo, prereg)
+summary(model1)
+summary(model2)
+anova(model1,model2)
+
 ############ checking the assumptions of linear regression:
 
 ######## homoscedasticity
