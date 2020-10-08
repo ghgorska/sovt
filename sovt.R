@@ -1,7 +1,11 @@
+
 setwd("C:/Users/jakub/Desktop/phd/badanie Izrael")
 
-###########################################################preparing the real-life HELPING QUESTION ###################################
 install.packages("readxl")
+install.packages("Hmisc")
+
+######################## preparing the real-life HELPING QUESTION ######################## 
+
 library(readxl)
 odpIZR <- read_excel("beh.xlsx")
 odpIZR
@@ -12,12 +16,8 @@ odpIZR_beh <- read_excel("beh_row.xlsx")
 odpIZR_beh
 hist(odpIZR_beh$behavioural)
 
-require(foreign)
-require(ggplot2)
-require(MASS)
-require(Hmisc)
-require(reshape2)
-
+library(ggplot2)
+library(reshape2)
 library(MASS)
 library(Hmisc)
 library(foreign)
@@ -32,11 +32,13 @@ install.packages("dplyr")
 library(dplyr)
 odpIZR_beh %>% count(behavioural)
 
+# sum of selected helping options (not weigthed by the degree of commitment of the option)
+# (added by Mathis)
+prereg$beh_sumB <- nchar(gsub("[^1-9]", "",  prereg$`behavioural question`))
 
 
-############################################################ DATA ANALYSIS ########################
+######################## DATA ANALYSIS ######################## 
 
-install.packages("readxl")
 library(readxl)
 prereg <- read_excel("preregistration.xlsx")
 
@@ -46,22 +48,23 @@ write_sav(prereg, "prereg.sav", compress = FALSE)
 
 library(foreign)
 
-########################################################### the results of the outliers
+######## the results of the outliers
 
 person19 <- prereg[19, c("HE_comp", "NEU_comp", "HE_neg", "NEU_neg", "CLS", "IRI_EC", "hypothetical", "iwah_humanity", "Vladimirs", "beh_sum", 
                          "beh_lower", "beh_upper", "conf_nations_neigh", "conf_isr")]
 person19
 write_xlsx(person19,"C:/Users/jakub/Desktop/phd/badanie Izrael\\person19.xlsx")
 
-################################################the results without the person #19
+######## the results without the person #19
 
 prereg <- prereg[-19,]
 prereg[19,"HE_comp"]
 
-#create a new column with substracted value
+########  create a new column with substracted value
+
 prereg$neg <- (prereg$HE_neg - prereg$NEU_neg)
 
-########checking for normality across the results:
+######## checking for normality across the results:
 
 shapiro.test(prereg$HE_comp)
 shapiro.test(prereg$HE_neg)
@@ -87,7 +90,7 @@ shapiro.test(prereg$iwah_humanity)
 
 shapiro.test(prereg$beh_contin)
 
-####histograms
+######## histograms
 
 ggplot(prereg, aes(x=HE_comp)) + geom_histogram()
 ggplot(prereg, aes(x=HE_neg)) + geom_histogram()
@@ -117,14 +120,16 @@ ggplot(prereg, aes(x=beh_lower)) + geom_histogram()
 ggplot(prereg, aes(x=neg_emo)) + geom_histogram()
 
 
-#########################H1 t test################################
+######################### H1 t test ################################
 
 t.test(x=prereg$HE_comp, y=prereg$NEU_comp, alternative="two.sided", paired=T)
 t.test(x=prereg$HE_neg, y=prereg$NEU_neg, alternative="two.sided", paired=T)
 
-##################### H 2 SoVT negative emotions vs. PD ###################################
-install.packages("Hmisc")
+
+######################### H 2 SoVT negative emotions vs. PD ######################### 
+
 library(Hmisc)
+
 #create a new column with substracted value
 prereg$neg_emo <- (prereg$HE_neg - prereg$NEU_neg)
 shapiro.test(prereg$neg_emo)
@@ -140,13 +145,17 @@ macierz_H2.cor
 macierz_H2.rcorr = rcorr(as.matrix(macierz_H2))
 macierz_H2.rcorr
 
-############################ H3 SoVT & compassion $ helping beh
+# correlate pure negative affect with PD
+cor(prereg$HE_neg, prereg$IRI_PD, use ="pairwise.complete.obs")
+
+
+############################ H3 SoVT & compassion $ helping beh ######################### 
 
 prereg$comp <- (prereg$HE_comp - prereg$NEU_comp)
 
 shapiro.test(prereg$comp)
 
-macierz_H3 <- prereg[, c("HE_comp", "CLS", "IRI_EC", "hypothetical", "beh_sum", "beh_upper", "beh_lower", "beh_weight", 
+macierz_H3 <- prereg[, c("HE_comp", "comp", "HE_neg", "neg_emo", "CLS", "IRI_EC", "IRI_PD", "IRI_FS", "IRI_PT", "hypothetical", "beh_sum", "beh_sumB", "beh_upper", "beh_lower", "beh_weight", 
                          "beh_binary", "beh_contin")]
 
 
@@ -159,8 +168,7 @@ macierz_H3.rcorr = rcorr(as.matrix(macierz_H3))
 macierz_H3.rcorr
 
 
-###compassion rating as compassion in emotional condition of SoVT only
-
+### compassion rating as compassion in emotional condition of SoVT only
 
 macierz_H3b <- prereg[, c("HE_comp", "CLS", "IRI_EC", "hypothetical", "iwah_humanity", "Vladimirs", "beh_sum", "beh_lower", "beh_upper", "conf_nations_neigh", "conf_isr")]
 
@@ -174,8 +182,7 @@ macierz_H3b.rcorr = rcorr(as.matrix(macierz_H3b))
 macierz_H3b.rcorr
 
 
-
-############HYPOTHESIS 4: SoVT COMPASSION and intergroup measures:
+######################### HYPOTHESIS 4: SoVT COMPASSION and intergroup measures: ######################### 
 
 macierz_H4 <- prereg[, c("HE_comp", "CLS", "IRI_EC", "conf_nations_neigh", "conf_isr", "conlict", "iwah_humanity",
                          "iwah_israelis", "iwah_community", "Vladimirs")]
@@ -193,27 +200,26 @@ lower
 library(xtable)
 mcor <- as.data.frame(mcor)
 
-#################################HYPOTHESIS 4: SoVT COMPASSION and conflict scale (only the Israeli-Jewish participants)
+######################### HYPOTHESIS 4: SoVT COMPASSION and conflict scale (only the Israeli-Jewish participants) ######################### 
 
 macierz_H4conf <- prereg[which(prereg$nationality=="ISR"), c("HE_comp", "CLS", "IRI_EC", "conf_nations_neigh", "conf_isr", "conlict", "iwah_humanity",
                                                              "iwah_israelis", "iwah_community", "Vladimirs")]
 macierz_H4conf.rcorr = rcorr(as.matrix(macierz_H4conf))
 macierz_H4conf.rcorr 
 
-#####correlations with beh questions
+##### correlations with beh questions
 
 cor(macierz_H3b$HE_comp, macierz_H3b$beh_sum, use ="pairwise.complete.obs", method="spearman")
 cor(macierz_H3b$HE_comp, macierz_H3b$beh_upper, use ="pairwise.complete.obs", method="spearman")
 cor(macierz_H3b$HE_comp, macierz_H3b$beh_lower, use ="pairwise.complete.obs", method="spearman")
 
-#######scatter plots for the correlations:
+####### scatter plots for the correlations:
 
 library(ggplot2)
 # Basic scatter plot
 ggplot(macierz_H3b, aes(x=HE_comp, y=iwah_humanity)) + geom_point() +geom_smooth()
 
-
-##########################################################descriptive stats:
+####### descriptive stats:
 
 summary(prereg$beh_contin)
 sd(prereg$beh_contin)
@@ -221,54 +227,77 @@ res_sd = na.omit(prereg$beh_contin)
 sd(res_sd)
 
 
+######################### HHYPOTHESIS 5a: regressions ######################### 
 
-#################################################HHYPOTHESIS 5a: regressions
-######################Hypothetical helping questions
-##############one predictor model
+###################### Hypothetical helping questions
+############## one predictor model
 
 onepred <- lm(hypothetical ~ IRI_EC, prereg)
+onepred2 <- lm(hypothetical ~ CLS, prereg)
+onepred3 <- lm(hypothetical ~ HE_comp, prereg)
+
 summary(onepred)
 
-#############two predictors: IRI_EC and compassion (SoVT)
+############# two predictors: IRI_EC and compassion (SoVT)
 
 twopred <- lm(hypothetical ~ IRI_EC + HE_comp, prereg)
+twopred2 <- lm(hypothetical ~ IRI_EC + CLS, prereg)
+twopred3 <- lm(hypothetical ~ HE_comp + IRI_EC, prereg)
 summary(twopred)
 
-##########compare the models
-anova(onepred)
-anova(twopred)
-
-#############three predictors: CLS, IRI_EC and compassion (SoVT)
+############# three predictors: CLS, IRI_EC and compassion (SoVT)
 
 threepred <- lm(hypothetical ~ IRI_EC + CLS + HE_comp, prereg)
 summary(threepred)
 anova(threepred)
 
-############checking the assumptions of linear regression:
+########## compare the models
+anova(onepred, twopred2)
+anova(twopred2, threepred)
+anova(onepred3, twopred3)
 
-########homoscedasticity
+######### compariong the sovt empathy score to IRI (added by Mathis)
+model1 <- lm(hypothetical ~ IRI_EC + IRI_PD + IRI_FS + IRI_PT, prereg)
+model2 <- lm(hypothetical ~ IRI_EC + IRI_PD + IRI_FS + IRI_PT + neg_emo, prereg)
+summary(model1)
+summary(model2)
+anova(model1,model2)
+
+############ checking the assumptions of linear regression:
+
+######## homoscedasticity
 par(mfrow=c(2,2))
 plot(threepred)
 
 library(car)
 ncvTest(threepred)
-#######independent errors:
+
+####### independent errors:
 library(lmtest)
 dwtest(threepred)
 
-#######normally distributed errors:
+####### normally distributed errors:
 threepred.stdres = rstandard(threepred)
 qqnorm(threepred.stdres)
 qqline(threepred.stdres)
 
-########homoscedasticity for the two predictors model
+######## homoscedasticity for the two predictors model
 par(mfrow=c(2,2))
 plot(twopred)
 ncvTest(twopred)
-########independent errors:
+
+######## independent errors:
 dwtest(twopred)
 
-########################################ordinal log regression
+######################################## ordinal log regression
+
+####### Descirptive plots
+ggplot(prereg, aes(x = beh_upperf, y = IRI_EC)) + geom_boxplot()
+ggplot(prereg, aes(x = as.factor(beh_sumB), y = IRI_EC)) + geom_boxplot()
+ggplot(prereg, aes(x = beh_upperf, y = HE_comp)) + geom_boxplot()
+
+
+####### Tests
 
 require(foreign)
 require(ggplot2)
@@ -279,13 +308,28 @@ require(reshape2)
 prereg$beh_upperf <- as.factor(prereg$beh_upper)
 
 m <- polr(beh_upperf ~ IRI_EC, data = prereg, Hess=TRUE)
+#m <- polr(beh_upperf ~ HE_comp, data = prereg, Hess=TRUE)
 summary(m)
 summary_table <- coef(summary(m))
 pval <- pnorm(abs(summary_table[, "t value"]),lower.tail = FALSE)* 2
 summary_table <- cbind(summary_table, "p value" = round(pval,3))
 summary_table
 
-##############ordinal log regression with 2 predictors:
+library(nnet)
+mlm <- multinom(beh_upperf ~ IRI_EC, data=prereg)
+#mlm <- multinom(beh_upperf ~ HE_comp, data=prereg)
+
+M1 <- logLik(m)
+M2 <- logLik(mlm)
+(G <- -2*(M1[1] - M2[1]))
+pchisq(G,3,lower.tail = FALSE)
+# -> the p-value is significant, this means that the multinomial logit model (mlm) 
+# differs (fits better) from the ordinal logistic model. Therefore the assumption of
+# proportional odds is not met. This is also indicated by the variance in the coefficients
+# for the effect of IRI_EC acrross the different levels of the outcome in the mlm model:
+summary(mlm)
+
+############## ordinal log regression with 2 predictors:
 m <- polr(beh_upperf ~ IRI_EC + HE_comp, data = prereg, Hess=TRUE)
 summary(m)
 summary_table <- coef(summary(m))
@@ -310,26 +354,26 @@ s <- with(prereg, summary(as.numeric(beh_upperf) ~ na.omit(IRI_EC) + na.omit(HE_
 s
 xtabs(~ beh_upperf + HE_comp, data=prereg)
 
-#################################################HHYPOTHESIS 5b: regressions & PERSONAL DISTRESS (EMPATHY)
-######################Hypothetical helping questions
-##############one predictor model
+######################### HHYPOTHESIS 5b: regressions & PERSONAL DISTRESS (EMPATHY) ######################### 
+###################### Hypothetical helping questions
+############## one predictor model
 
 onepred <- lm(hypothetical ~ IRI_PD, prereg)
 summary(onepred)
 
-#############two predictors: IRI_EC and compassion (SoVT)
+############# two predictors: IRI_EC and compassion (SoVT)
 
 twopred <- lm(hypothetical ~ IRI_PD + neg, prereg)
 summary(twopred)
 
-##########compare the models
+########## compare the models
 anova(onepred)
 anova(twopred)
 
 
-############checking the assumptions of linear regression:
+############ checking the assumptions of linear regression:
 
-########homoscedasticity
+######## homoscedasticity
 par(mfrow=c(2,2))
 plot(onepred)
 plot(twopred)
@@ -337,12 +381,13 @@ plot(twopred)
 library(car)
 ncvTest(onepred)
 ncvTest(twopred)
-#######independent errors:
+
+####### independent errors:
 library(lmtest)
 dwtest(onepred)
 dwtest(twopred)
 
-#######normally distributed errors:
+####### normally distributed errors:
 onepred.stdres = rstandard(onepred)
 qqnorm(onepred.stdres)
 qqline(onepred.stdres)
@@ -351,14 +396,15 @@ twopred.stdres = rstandard(twopred)
 qqnorm(twopred.stdres)
 qqline(twopred.stdres)
 
-########homoscedasticity for the two predictors model
+######## homoscedasticity for the two predictors model
 par(mfrow=c(2,2))
 plot(twopred)
 ncvTest(twopred)
-########independent errors:
+
+######## independent errors:
 dwtest(twopred)
 
-########################################ordinal log regression
+######################################## ordinal log regression
 
 require(foreign)
 require(ggplot2)
@@ -375,7 +421,7 @@ pval <- pnorm(abs(summary_table[, "t value"]),lower.tail = FALSE)* 2
 summary_table <- cbind(summary_table, "p value" = round(pval,3))
 summary_table
 
-##############ordinal log regression with 2 predictors:
+############## ordinal log regression with 2 predictors:
 m <- polr(beh_upperf ~ IRI_PD + neg, data = prereg, Hess=TRUE)
 summary(m)
 summary_table <- coef(summary(m))
@@ -383,7 +429,7 @@ pval <- pnorm(abs(summary_table[, "t value"]),lower.tail = FALSE)* 2
 summary_table <- cbind(summary_table, "p value" = round(pval,3))
 summary_table
 
-###########calculating the cumulative odds:
+########### calculating the cumulative odds:
 
 sf <- function(y) {
   c('Y>=1' = qlogis(mean(y >= 0)),
