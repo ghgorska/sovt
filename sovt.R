@@ -397,3 +397,70 @@ s <- with(prereg, summary(as.numeric(beh_upperf) ~ na.omit(IRI_PD) + na.omit(neg
 s
 xtabs(~ beh_upperf + HE_comp, data=prereg)
 
+######### compariong the sovt empathy score to IRI (added by Mathis)
+model1 <- lm(hypothetical ~ IRI_EC + IRI_PD + IRI_FS + IRI_PT, prereg)
+model2 <- lm(hypothetical ~ IRI_EC + IRI_PD + IRI_FS + IRI_PT + neg_emo, prereg)
+summary(model1)
+summary(model2)
+anova(model1,model2)
+
+###############################################Logistic regression
+library(car)
+install.packages("mlogit")
+library(mlogit)
+
+
+#################predicting behavioral measure with personal distress and negative affect:
+
+model1 <- glm(beh_binary ~ neg_emo, data=prereg, family=binomial())
+model2 <- glm(beh_binary ~ neg_emo + IRI_PD, data=prereg, family=binomial())
+summary(model1) 
+chisq.prob <- 1 - pchisq(0.68, 1 )
+chisq.prob
+exp(model1$coefficients)
+exp(confint(model1))
+
+summary(model2)
+modelChi <- model1$deviance - model2$deviance
+chidf <- model1$df.residual - model2$df.residual
+chisq.prob <- 1 - pchisq(modelChi, chidf)
+modelChi; chidf; chisq.prob
+
+anova(model1, model2)
+
+
+####################predicting behavioral measure with compassion (SoVT), EC (IRI) and CLS:
+
+model1 <- glm(beh_binary ~ IRI_EC, data=prereg, family=binomial())
+model2 <- glm(beh_binary ~ IRI_EC + HE_comp, data=prereg, family=binomial())
+model3 <- glm(beh_binary ~ IRI_EC + HE_comp + CLS, data=prereg, family=binomial())
+summary(model1)
+chisq.prob <- 1 - pchisq(2.6, 1 )
+chisq.prob
+exp(model1$coefficients)
+exp(confint(model1))
+
+summary(model3)
+chisq.prob <- 1 - pchisq(7.65, 3 )
+chisq.prob
+exp(model3$coefficients)
+exp(confint(model3))
+
+
+#######comparing model 2 & model 3:
+
+modelChi <- model2$deviance - model3$deviance
+chidf <- model2$df.residual - model3$df.residual
+chisq.prob <- 1 - pchisq(modelChi, chidf)
+modelChi; chidf; chisq.prob
+
+anova(model2, model3)
+
+
+#######################POST HOCs#################################################################
+##### But one post-hoc analysis that we can actually do is 
+##### to use the "pure" scores in the emotional condition, 
+##### to see whether there is any correlation there...
+
+
+#############add IWAH_Humanity as predictor
