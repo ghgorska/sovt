@@ -477,30 +477,30 @@ anova(model1, model2)
 
 ####################predicting behavioral measure with compassion (SoVT), EC (IRI) and CLS:
 
-model1 <- glm(beh_binary ~ IRI_EC, data=prereg, family=binomial())
-model2 <- glm(beh_binary ~ IRI_EC + HE_comp, data=prereg, family=binomial())
-model3 <- glm(beh_binary ~ IRI_EC + HE_comp + CLS, data=prereg, family=binomial())
+model1 <- glm(beh_binary ~ IRI_EC + CLS, data=prereg, family=binomial())
+model2 <- glm(beh_binary ~ IRI_EC + CLS + HE_comp, data=prereg, family=binomial())
+
 summary(model1)
-chisq.prob <- 1 - pchisq(2.6, 1 )
+chisq.prob <- 1 - pchisq(6.56, 2 )
 chisq.prob
 exp(model1$coefficients)
 exp(confint(model1))
 
-summary(model3)
+summary(model2)
 chisq.prob <- 1 - pchisq(7.65, 3 )
 chisq.prob
-exp(model3$coefficients)
-exp(confint(model3))
+exp(model2$coefficients)
+exp(confint(model2))
 
 
-#######comparing model 2 & model 3:
+#######comparing model 1 & model 2:
 
-modelChi <- model2$deviance - model3$deviance
-chidf <- model2$df.residual - model3$df.residual
+modelChi <- model1$deviance - model2$deviance
+chidf <- model1$df.residual - model2$df.residual
 chisq.prob <- 1 - pchisq(modelChi, chidf)
 modelChi; chidf; chisq.prob
 
-anova(model2, model3)
+anova(model1, model2)
 
 
 #######################POST HOCs#################################################################
@@ -509,4 +509,29 @@ anova(model2, model3)
 ##### to see whether there is any correlation there...
 
 
-#############add IWAH_Humanity as predictor
+
+############# correlation matrix: empathy (SoVT) & PD(IRI) & other measures
+
+macierz_H2 <- prereg[, c("neg", "IRI_PD", "IRI_EC", "IRI_PT", "IRI_FS", "conlict", "hypothetical", "CLS", 
+                         "Vladimirs", "beh_upper", "beh_binary", "politics", "morals", "economics",
+                         "iwah_humanity", "iwah_israelis", "iwah_community")]
+
+macierz_H2.cor = cor(macierz_H2, method = c("spearman"))
+macierz_H2.cor
+
+macierz_H2.rcorr = rcorr(as.matrix(macierz_H2))
+macierz_H2.rcorr
+
+############## IWAH only Israelis - correlation matrix
+
+macierz_H4 <- prereg[which(prereg$nationality=="ISR"), c("conf_nations_neigh", "conf_isr", "conlict", 
+                                                         "iwah_humanity", "iwah_israelis", "iwah_community", "Vladimirs",
+                                                         "neg", "HE_comp", "CLS", "IRI_PD", "IRI_EC", "IRI_PT", "IRI_FS",
+                                                         "beh_upper", "beh_binary", "hypothetical", 
+                                                         "politics", "morals", "economics"
+                                                         )]
+                                                          
+macierz_H4.rcorr = rcorr(as.matrix(macierz_H4))
+macierz_H4.rcorr 
+
+#############add IWAH_Humanity as predictor 
