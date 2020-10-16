@@ -503,6 +503,79 @@ modelChi; chidf; chisq.prob
 anova(model1, model2)
 
 
+#####################################testing the assumptions, and testing for R2 of the models:
+
+###checking the assumption of multicollinearity:
+library(car)
+vif(model1)
+#####no results above 10 -> rather no problems with multicollinearity
+
+summary(model2)
+chisq.prob <- 1 - pchisq(7.65, 3 )
+chisq.prob
+exp(model2$coefficients)
+exp(confint(model2))
+vif(model2)
+
+###############checking the assumption of linearity for IRI_PD and empathy(SoVT):
+prereg$IRI_EClog <- log(prereg$IRI_EC) * prereg$IRI_EC
+prereg$CLSlog <- log(prereg$CLS) * prereg$CLS
+prereg$HE_complog <- log(prereg$HE_comp) * prereg$HE_comp
+testingmodel2 <- glm(beh_binary ~ IRI_EC + CLS + HE_comp + IRI_EClog + CLSlog + HE_complog, data=prereg, family=binomial())
+summary(testingmodel2)
+
+#######comparing model 1 & model 2:
+
+modelChi <- model1$deviance - model2$deviance
+chidf <- model1$df.residual - model2$df.residual
+chisq.prob <- 1 - pchisq(modelChi, chidf)
+modelChi; chidf; chisq.prob
+
+anova(model1, model2)
+
+##############   R square for the log binomial regression
+
+logisticPseudoR2s <- function(LogModel) {
+  dev <- LogModel$deviance 
+  nullDev <- LogModel$null.deviance 
+  modelN <-  length(LogModel$fitted.values)
+  R.l <-  1 -  dev / nullDev
+  R.cs <- 1- exp ( -(nullDev - dev) / modelN)
+  R.n <- R.cs / ( 1 - ( exp (-(nullDev / modelN))))
+  cat("Pseudo R^2 for logistic regression\n")
+  cat("Hosmer and Lemeshow R^2  ", round(R.l, 3), "\n")
+  cat("Cox and Snell R^2        ", round(R.cs, 3), "\n")
+  cat("Nagelkerke R^2           ", round(R.n, 3),    "\n")
+}
+
+logisticPseudoR2s(model2)
+
+
+
+#######the assumption of linearity is not met with the CLS; Hence rescaling the CLS data:
+
+prereg$recCLS <- 1/(prereg$CLS)
+prereg$rec2CLS <- sqrt(prereg$CLS)
+###checking the effects of rescaling on the model
+
+testingmodel2 <- glm(beh_binary ~ IRI_EC + rec2CLS + HE_comp + IRI_EClog + rec2CLSlog + HE_complog, data=prereg, family=binomial())
+summary(testingmodel2)
+
+#re-scaling didn't bring any effects; after looking at the histograms, we detected an outliner person #58
+prereg <- prereg[-58,]
+
+#######excluding the person deals efficiently with the linearity issue, the model now is valid:
+
+prereg$IRI_EClog <- log(prereg$IRI_EC) * prereg$IRI_EC
+prereg$CLSlog <- log(prereg$CLS) * prereg$CLS
+prereg$HE_complog <- log(prereg$HE_comp) * prereg$HE_comp
+
+
+testingmodel3 <- glm(beh_binary ~ IRI_EC + CLS + HE_comp + IRI_EClog + CLSlog + HE_complog, data=prereg, family=binomial())
+summary(testingmodel3)
+
+
+
 #######################POST HOCs#################################################################
 ##### But one post-hoc analysis that we can actually do is 
 ##### to use the "pure" scores in the emotional condition, 
@@ -534,4 +607,62 @@ macierz_H4 <- prereg[which(prereg$nationality=="ISR"), c("conf_nations_neigh", "
 macierz_H4.rcorr = rcorr(as.matrix(macierz_H4))
 macierz_H4.rcorr 
 
-#############add IWAH_Humanity as predictor 
+#############add IWAH_Humanity as predictor, and IWAH_community predicting prosociality (hypothetical helping)
+
+model1 <- lm(hypothetical ~ iwah_humanity, prereg)
+model2 <- lm(hypothetical ~ iwah_humanity + IRI_EC, prereg)
+summary(model1)
+summary(model2)
+anova(model1,model2)
+
+model1 <- lm(hypothetical ~ iwah_community, prereg)
+model2 <- lm(hypothetical ~ iwah_community + IRI_EC, prereg)
+summary(model1)
+summary(model2)
+anova(model1,model2)
+
+###iwah(community) & negative afect (SoVT) predicting prosociality(hypothetical helping)
+model1 <- lm(hypothetical ~ iwah_humanity, prereg)
+model2 <- lm(hypothetical ~ iwah_humanity + neg, prereg)
+summary(model1)
+summary(model2)
+anova(model1,model2)
+
+model1 <- lm(hypothetical ~ iwah_community, prereg)
+model2 <- lm(hypothetical ~ iwah_community + neg, prereg)
+summary(model1)
+summary(model2)
+anova(model1,model2)
+
+
+#########beh binary data predicted by iwah (community)
+
+model1 <- glm(beh_binary ~ IRI_EC + CLS, data=prereg, family=binomial())
+model2 <- glm(beh_binary ~ IRI_EC + CLS + iwah_community, data=prereg, family=binomial())
+summary(model1)
+summary(model2)
+
+modelChi <- model1$deviance - model2$deviance
+chidf <- model1$df.residual - model2$df.residual
+chisq.prob <- 1 - pchisq(modelChi, chidf)
+modelChi; chidf; chisq.prob
+
+anova(model1, model2)
+
+
+#########beh binary data predicted by iwah (humanity)
+
+model1 <- glm(beh_binary ~ IRI_EC + CLS, data=prereg, family=binomial())
+model2 <- glm(beh_binary ~ IRI_EC + CLS + iwah_humanity, data=prereg, family=binomial())
+summary(model1)
+summary(model2)
+
+modelChi <- model1$deviance - model2$deviance
+chidf <- model1$df.residual - model2$df.residual
+chisq.prob <- 1 - pchisq(modelChi, chidf)
+modelChi; chidf; chisq.prob
+
+anova(model1, model2)
+
+#######
+
